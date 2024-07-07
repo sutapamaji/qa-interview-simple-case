@@ -1,29 +1,32 @@
 import { test, expect } from '@playwright/test'
+import { LoginPage } from '../../pages/LoginPage';
 import { existingUsers } from '../../test-setup/localstorage.setup'
 
-test.describe.configure({ mode: 'serial' })
-
 test.describe('login form tests', () => {
-  test('logging in works with existing account', async ({ page }) => {
-    await page.goto('localhost:8080/login')
+  existingUsers.forEach((existingUser, index) => {
+    test(`logging in to Strawberry QA Chapter Website with existing account ${index + 1}`, async ({ page }) => {
 
-    const existingUser = existingUsers[0]
+      const loginPage = new LoginPage(page);
 
-    await page
-      .locator('#root form div:nth-child(1) > div > input')
-      .pressSequentially(existingUser.email)
+      // Navigate to the login page 
+      await loginPage.navigateToLogin();
 
-    await page
-      .locator('#root form div:nth-child(2) > div > input')
-      .pressSequentially(existingUser.password)
+      // Wait for the login page to load
+      await loginPage.waitForLoginPageToLoad();
 
-    // Submit button
-    const button = page.locator('form .MuiButton-sizeMedium')
-    // Click on the button
-    button.click()
+      console.log(`Logging in with email: ${existingUser.email} and password: ${existingUser.password}`);
+      await loginPage.enterEmail(existingUser.email);
+      await loginPage.enterPassword(existingUser.password);
+      await loginPage.login();
 
-    // Wait for 1 second until page is fully loaded
-    await page.waitForTimeout(1000)
-    await expect(page.getByText('Log out')).toBeVisible()
-  })
-})
+      // Assert that the "Log out" button is visible after login
+      const isLogoutVisible = await loginPage.isLogoutButtonVisible();
+      expect(isLogoutVisible).toBeTruthy();
+      console.log(`Loggin successful for the user: ${existingUser.firstName} ${existingUser.lastName}`);
+
+      // Log out to prepare for the next user
+      await page.click('button:has-text("Log out")');
+      await loginPage.waitForLoginPageToLoad();
+    });
+  });
+});
