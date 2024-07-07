@@ -58,7 +58,10 @@ npx playwright install
 > We need to be able to review the assignment, so you have to make sure that the forked repo is public.
 
 #### Test Structure
-
+- Project implememts page object model design pattern.
+    - BasePage, LoginPage, SignupPage
+- Inside helper folder required helping files are located to organize the code.
+    -  config.ts and signup.ts
 
 > login.test.ts
 This test file contains automated tests for the login functionality of the web application. It includes scenarios to:
